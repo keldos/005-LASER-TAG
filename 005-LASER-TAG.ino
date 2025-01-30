@@ -23,19 +23,34 @@
   *
   ************************************************************************************
 */
+
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> FEATURES <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+#define RF_COMMS
+
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>> PIN DEFINITIONS <<<<<<<<<<<<<<<<<<<<<<<<<<<<
 #define IR_SEND_PIN         3
 #define IR_RECEIVE_PIN      5
 #define _IR_TIMING_TEST_PIN 7
 
-#define RELOAD_PIN      10
 #define SERVO_PIN       9
-#define BUZZER_PIN      11
-#define TRIGGER_PIN     12
 
-#define TEAM1_PIN       15      // A1 pin
-#define TEAM2_PIN       16      // A2 pin
-#define TEAM3_PIN       17      // A3 pin
+#if defined(RF_COMMS)
+  #define RELOAD_PIN      14 // A0 pin
+  #define BUZZER_PIN      16 // A2 pin
+  #define TRIGGER_PIN     17 // A3 pin
+
+  #define COMMS_CE        2
+  #define COMMS_CSN       4
+#else
+  #define RELOAD_PIN      10
+  #define BUZZER_PIN      11
+  #define TRIGGER_PIN     12
+#endif
+
+// #define TEAM1_PIN       15      // A1 pin
+// #define TEAM2_PIN       16      // A2 pin
+// #define TEAM3_PIN       17      // A3 pin
 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> LIBRARIES <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 #define DECODE_NEC              // defines RIR Protocol (Apple and Onkyo)
@@ -44,6 +59,14 @@
 #include <Arduino.h>
 #include <Servo.h>
 #include <U8g2lib.h>
+
+#if defined(RF_COMMS)
+  #include <SPI.h>
+  #include <nRF24L01.h>
+  #include <RF24.h>
+
+  RF24 radio(COMMS_CE, COMMS_CSN); // CE, CSN
+#endif
 
 Servo myservo;
 U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R2, U8X8_PIN_NONE);
@@ -164,17 +187,17 @@ void setup() {
   pinMode(TRIGGER_PIN, INPUT_PULLUP);
   pinMode(RELOAD_PIN, INPUT_PULLUP);
   pinMode(BUZZER_PIN, OUTPUT);
-  pinMode(TEAM1_PIN, INPUT_PULLUP);
-  pinMode(TEAM2_PIN, INPUT_PULLUP);
-  pinMode(TEAM3_PIN, INPUT_PULLUP);
+  // pinMode(TEAM1_PIN, INPUT_PULLUP);
+  // pinMode(TEAM2_PIN, INPUT_PULLUP);
+  // pinMode(TEAM3_PIN, INPUT_PULLUP);
 
-  if (digitalRead(TEAM1_PIN) == LOW) {
-    team = 1;
-  } else if (digitalRead(TEAM2_PIN) == LOW) {
-    team = 2;
-  } else if (digitalRead(TEAM3_PIN) == LOW) {
-    team = 3;
-  }
+  // if (digitalRead(TEAM1_PIN) == LOW) {
+  team = 1;
+  // } else if (digitalRead(TEAM2_PIN) == LOW) {
+  //   team = 2;
+  // } else if (digitalRead(TEAM3_PIN) == LOW) {
+  //   team = 3;
+  // }
 
   if (team == 1) {
     sCommand = 0x34;
